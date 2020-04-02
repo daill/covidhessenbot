@@ -53,32 +53,34 @@ logger.addHandler(ch)
 # read page content from configured url
 def get_site_content():
     logger.debug("Get site content")
-    fp = urllib.request.urlopen(config['DEFAULT']['PageUrl'])
-    my_bytes = fp.read()
-
-    my_str = my_bytes.decode("utf8")
+    fp = urllib.request.urlopen(config['DEFAULT']['PageUrl'], timeout=60)
+    page_content = fp.read()
+    page_str = page_content.decode("utf8")
     fp.close()
     logger.debug("Get site content finished")
 
     global table, old_table
 
-    parser = MyHTMLParser()
-    parser.feed(my_str)
-    title, table = parser.get_result()
+    if page_str:
+        parser = MyHTMLParser()
+        parser.feed(page_str)
+        title, table = parser.get_result()
 
-    logger.debug(str(table))
-    logger.debug(str(old_table))
+        logger.debug(str(table))
+        logger.debug(str(old_table))
 
-    if str(table) != str(old_table):
-        logger.debug("Data has been updated")
-        global message
-        message = get_message(title, table)
-        old_table = copy.deepcopy(table)
-        update_table.clear()
+        if str(table) != str(old_table):
+            logger.debug("Data has been updated")
+            global message
+            message = get_message(title, table)
+            old_table = copy.deepcopy(table)
+            update_table.clear()
+        else:
+            logger.debug("Data has not changed")
+
+        parser.close()
     else:
-        logger.debug("Data has not changed")
-
-    parser.close()
+        logger.debug("Page content was not available, try again next time")
 
 
 

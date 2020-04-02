@@ -26,14 +26,6 @@ class MyHTMLParser(HTMLParser):
         self.title = []
         self.table = []
 
-    def reset_results(self):
-        self.title.clear()
-        self.table.clear()
-        self.in_table = False
-        self.first_row = None
-        self.row_count = -1
-        self.p_tag = False
-
     def get_result(self):
         return self.title, self.table
 
