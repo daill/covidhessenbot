@@ -19,11 +19,10 @@ import logging
 import time
 import urllib.request
 
-import schedule
 from telegram import ParseMode
 from telegram.ext import Updater, CommandHandler
-
 from pageparser import MyHTMLParser
+from safe_scheduler import SafeScheduler
 
 # create cfg parser
 config = configparser.ConfigParser()
@@ -35,6 +34,7 @@ update_table = {}
 message = ""
 table = None
 old_table = None
+scheduler = SafeScheduler(reschedule_on_failure=True)
 
 # logging
 logger = logging.getLogger()
@@ -170,12 +170,12 @@ def main():
     get_covid_data()
 
     updater.start_polling()
-    schedule.every(int(config['DEFAULT']['ScrapeJobTimer'])).minutes.do(get_covid_data)
+    scheduler.every(int(config['DEFAULT']['ScrapeJobTimer'])).minutes.do(get_covid_data)
 
 
 if __name__ == "__main__":
     main()
 
     while True:
-        schedule.run_pending()
+        scheduler.run_pending()
         time.sleep(1)
